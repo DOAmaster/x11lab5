@@ -74,8 +74,12 @@ public:
 	int checker;
 	int saturn;
 	int initials;
+	int checkx;
+	int checky;
 	Global() {
 		srand((unsigned)time(NULL));
+		checkx = 100;
+		checky = 100;
 		xres = 640, yres = 480;
 		mode = 0;
 		nobjects = 0;
@@ -252,6 +256,7 @@ void init(void)
 	vecMake(0.0,4.0, -1.0, o->norm);
 	vecMake(0,0,1, o->color);
 	o->radius = 100.0;
+	o->radius2 = 90.0;
 	vecNormalize(o->norm);
 	g.nobjects++;
 
@@ -533,12 +538,12 @@ void trace(Ray *ray, Vec rgb)
 				}
 				break;
 			case TYPE_RING:
-        if(rayRingIntersect(o, ray, &hit)) {
-          if (hit.t < closehit.t) {
-            closehit.t = hit.t;
-            vecCopy(hit.p, closehit.p);
-            vecCopy(o->color, closehit.color);
-            h=i;
+        			if(rayRingIntersect(o, ray, &hit)) {
+          				if (hit.t < closehit.t) {
+            					closehit.t = hit.t;
+            					vecCopy(hit.p, closehit.p);
+            					vecCopy(o->color, closehit.color);
+           	 				h=i;
           }
         }
 				break;
@@ -550,6 +555,17 @@ void trace(Ray *ray, Vec rgb)
 	}
 	if (h < 0) {
 		//ray did not hit an object.
+		//draw checkered board
+//		int dx = hit.p[0] / (g.checkx);
+//		if ( dx % 2 == 0) {
+//			int dy = hit.p[1] / (g.checky);
+//			if( dy % 2 == 0) {
+//				x11.setColor3i(0,0,0);
+//				vecCopy(o->color, closehit.color);
+//			}
+//		} else {
+//			x11.setColor3i(255,255,255);
+//		}
 		return;
 	}
 	//The ray hit an object.
@@ -591,8 +607,8 @@ void render(int projection)
 			eye[2] = 1000.0;
 			if (projection == PERSPECTIVE) {
 				//Place code here for perspective projection
-        eye[1] = 0;
-        eye[0] = 0;
+        			eye[1] = 0;
+        			eye[0] = 0;
 
 
 
