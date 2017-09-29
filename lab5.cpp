@@ -250,7 +250,7 @@ void init(void)
 	g.nobjects=0;
 
 	//saturn start
-	if (g.saturn) {
+	if (g.mode == 5) {
   //create ring 1
 	o = &g.object[g.nobjects];
 	o->type = TYPE_RING;
@@ -273,12 +273,33 @@ void init(void)
 	o->radius2 = 90.0;
 	vecNormalize(o->norm);
 	g.nobjects++;
+	  //create ring 3
+	o = &g.object[g.nobjects];
+	o->type = TYPE_RING;
+  //x y and z. z determines what layer it is on
+	vecMake(0.0, 20.0, -3000.0, o->center);
+	vecMake(0.0, 5.0, -1.0, o->norm);
+	vecMake(0,0,1, o->color);
+	o->radius = 100.0;
+	o->radius2 = 90.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+  //create saturn disk
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+  //x y and z. z determines what layer it is on
+	vecMake(0.0, 10.0, -3000.0, o->center);
+  //modified norm
+	vecMake(0.0,0.0, -1.0, o->norm);
+	vecMake(0,.5,.5, o->color);
+	o->radius = 80.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
 
 	//end of saturn
 	}
-
-//colors
-	if (g.color) {
+//checkers start
+	if (g.mode == 4) {
   //creates disks
 	o = &g.object[g.nobjects];
 	o->type = TYPE_DISK;
@@ -309,7 +330,43 @@ void init(void)
 	vecNormalize(o->norm);
 	g.nobjects++;
 
-	//end of tilt
+
+	//end of checkers
+	}
+//colors start
+	if (g.mode == 2) {
+  //creates disks
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+  //x y and z. z determines what layer it is on
+	vecMake(-100.0, -120.0, -3000.0, o->center);
+  //modified norm
+	vecMake(0.0,0.0, -1.0, o->norm);
+	vecMake(0,0,1, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+	//red disk
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+	vecMake(0.0, 0.0, -2000.0, o->center);
+	vecMake(0.0, 0.0, -1.0, o->norm);
+	vecMake(1,0,0, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+	//
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+	vecMake(100.0, 120.0, -1000.0, o->center);
+	vecMake(0.0, 0.0, -1.0, o->norm);
+	vecMake(1,1,0, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+
+
+	//end of colors
 	}
 
 	//gray mode
@@ -347,7 +404,7 @@ void init(void)
 	//end of tilt
 	}
   //tilted colored circles
-	if (g.tilt) {
+	if (g.mode == 3) {
   //creates disks
 	o = &g.object[g.nobjects];
 	o->type = TYPE_DISK;
@@ -418,16 +475,6 @@ void vecSub(Vec v0, Vec v1, Vec dest)
 	dest[2] = v0[2] - v1[2];
 }
 
-void vecNormalize(Vec vec)
-{
-	//Normalize a vector. Can be optimized a little.
-	//We will write this function in class together
-
-
-
-
-
-}
 
 void checkMouse(XEvent *e)
 {
@@ -483,22 +530,109 @@ int checkKeys(XEvent *e)
 	return 0; 
 }
 
+
+
 //goal is to populate a hit value for t
+void vecNormalize(Vec v)
+{
+    Flt len = vecLength(v);
+    if (len == 0.0) {
+        vecMake(1,0,0,v);
+        return;
+    }
+    v[0] /= len;
+    v[1] /= len;
+    v[2] /= len;
+}
+/*
+void getTriangleNormal(Vec tri[3], Vec norm)
+{
+    Vec v0,v1;
+    vecSub(tri[1], tri[0], v0);
+    vecSub(tri[2], tri[0], v1);
+    vecCrossProduct(v0, v1, norm);
+    vecNormalize(norm);
+}
+*/
+
+Flt getLength(Vec p1, Vec p2)
+{
+    Flt d0 = p2[0] - p1[0];
+    Flt d1 = p2[1] - p1[1];
+    Flt d2 = p2[2] - p1[2];
+    Flt len = sqrt(d0*d0 + d1*d1 + d2*d2);
+    return len;	
+}
+
+Flt getArea(Vec v0, Vec v1, Vec v2)
+{
+    //Herron's formula
+    Flt a = getLength(v1, v0);
+    Flt b = getLength(v2, v1);
+    Flt c = getLength(v0, v2);
+    Flt s = (a+b+c) / 2.0;
+    return (sqrt(s * (s-a) * (s-b) * (s-c)));
+}
+
+//funtion not given
+//fix this function
+/*
+void vecCrossProduct(Vec a, Vec b, vec result) {
+	Flt temp1;
+	temp1 = a[0]*b[0] - a[1]*b[1]
+	Flt temp2;
+	temp2 = 
+
+}
+*/
+
+/*
+bool pointInTriangle(Vec tri[3], Vec p, Flt *u, Flt *v)
+{
+    //This code was derived from the following source:
+    //http://blogs.msdn.com/b/rezanour/archive/2011/08/07/
+    //
+    //This function determines if point p is inside triangle tri.
+    //   step 1: 3D half-space tests
+    //   step 2: find barycentric coordinates
+    //
+    Vec cross0, cross1, cross2;
+    Vec ba, ca, pa;
+    //setup sub-triangles
+    vecSub(tri[1], tri[0], ba);
+    vecSub(tri[2], tri[0], ca);
+    vecSub(p, tri[0], pa);
+    //-------------------------
+    //This is a half-space test
+    //-------------------------
+    vecCrossProduct(ca, pa, cross1);
+    vecCrossProduct(ca, ba, cross0);
+    if (vecDotProduct(cross0, cross1) < 0.0)
+        return 0;
+    //-------------------------
+    //This is a half-space test
+    //-------------------------
+    vecCrossProduct(ba, pa, cross2);
+    vecCrossProduct(ba, ca, cross0);
+    if (vecDotProduct(cross0, cross2) < 0.0)
+        return 0;
+    //-------------------------
+    //Point is within 2 half-spaces
+    //Get area proportions
+    //-------------------------
+    Flt areaABC = vecLength(cross0);
+    Flt areaV = vecLength(cross1);
+    Flt areaU = vecLength(cross2);
+    *u = areaU / areaABC;
+    *v = areaV / areaABC;
+    //return true if valid barycentric coordinates.
+    return (*u >= 0.0 && *v >= 0.0 && *u + *v <= 1.0);
+}
+*/
+
 int rayPlaneIntersect(Vec center, Vec normal, Ray *ray, Hit *hit)
 {
-/*
-//-----------------------------------------------------------------
-//Comment this code when you are ready to write the lab assignment.
-//x componet
-hit->p[0] = ray->o[0];
-//y componet
-hit->p[1] = ray->o[1];
-//z componet
-hit->p[2] = center[2];
-hit->t = center[2] - ray->o[2];
-return 1;
-//-----------------------------------------------------------------
-*/
+
 	//http://mathworld.wolfram.com/Plane.html
 	//
 	//Where does the ray intersect the plane?
@@ -627,6 +761,15 @@ void trace(Ray *ray, Vec rgb)
 						closehit.t = hit.t;
 						vecCopy(hit.p, closehit.p);
 						vecCopy(o->color, closehit.color);
+						//checks if checkers is on
+						if ( g.checker) {
+							if(hit.t < g.checkx){
+								vecCopy(hit.p, closehit.p);
+								vecCopy(o->color, closehit.color);
+
+							}		
+
+						}
 						h=i;
 					}
 				}
