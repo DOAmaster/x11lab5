@@ -248,18 +248,106 @@ void init(void)
 	//Setup some objects
 	Object *o;
 	g.nobjects=0;
-  //create ring
+
+	//saturn start
+	if (g.saturn) {
+  //create ring 1
 	o = &g.object[g.nobjects];
 	o->type = TYPE_RING;
   //x y and z. z determines what layer it is on
-	vecMake(-200.0, -220.0, -3000.0, o->center);
-	vecMake(0.0,4.0, -1.0, o->norm);
+	vecMake(0.0, 0.0, -3000.0, o->center);
+	vecMake(0.0,3.8, -1.0, o->norm);
+	vecMake(0,0,1, o->color);
+	o->radius = 100.0;
+	o->radius2 = 90.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+  //create ring 2
+	o = &g.object[g.nobjects];
+	o->type = TYPE_RING;
+  //x y and z. z determines what layer it is on
+	vecMake(0.0, 10.0, -3000.0, o->center);
+	vecMake(0.0, 5.0, -1.0, o->norm);
 	vecMake(0,0,1, o->color);
 	o->radius = 100.0;
 	o->radius2 = 90.0;
 	vecNormalize(o->norm);
 	g.nobjects++;
 
+	//end of saturn
+	}
+
+//colors
+	if (g.color) {
+  //creates disks
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+  //x y and z. z determines what layer it is on
+	vecMake(-100.0, -120.0, -3000.0, o->center);
+  //modified norm
+	vecMake(0.0,0.0, -1.0, o->norm);
+	vecMake(0,0,1, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+	//red disk
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+	vecMake(0.0, 0.0, -2000.0, o->center);
+	vecMake(0.0, 0.0, -1.0, o->norm);
+	vecMake(1,0,0, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+	//
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+	vecMake(100.0, 120.0, -1000.0, o->center);
+	vecMake(0.0, 0.0, -1.0, o->norm);
+	vecMake(1,1,0, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+
+	//end of tilt
+	}
+
+	//gray mode
+	if (g.mode == 1) {
+  //creates disks
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+  //x y and z. z determines what layer it is on
+	vecMake(-100.0, -120.0, -3000.0, o->center);
+  //modified norm
+	vecMake(0.0,0.0, -1.0, o->norm);
+	vecMake(.5,.5,.5, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+	//red disk
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+	vecMake(0.0, 0.0, -2000.0, o->center);
+	vecMake(0.0, 0.0, -1.0, o->norm);
+	vecMake(.6,.6,.6, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+	//
+	o = &g.object[g.nobjects];
+	o->type = TYPE_DISK;
+	vecMake(100.0, 120.0, -1000.0, o->center);
+	vecMake(0.0, 0.0, -1.0, o->norm);
+	vecMake(.7,.7,.7, o->color);
+	o->radius = 100.0;
+	vecNormalize(o->norm);
+	g.nobjects++;
+
+	//end of tilt
+	}
+  //tilted colored circles
+	if (g.tilt) {
   //creates disks
 	o = &g.object[g.nobjects];
 	o->type = TYPE_DISK;
@@ -289,6 +377,9 @@ void init(void)
 	o->radius = 100.0;
 	vecNormalize(o->norm);
 	g.nobjects++;
+
+	//end of tilt
+	}
 }
 
 Flt vecDotProduct(Vec v0, Vec v1)
@@ -509,8 +600,11 @@ int rayRingIntersect(Object *o, Ray *ray, Hit *hit)
 		d2 = o->center[2] - hit->p[2];
 		dist = d0*d0+d1*d1+d2*d2;
 		if (dist <= o->radius * o->radius) {
-			//Hit is within radius
+			//Hit is within inner radius
+			if (dist >= o->radius2 * o->radius2) {
 			return 1;
+			}
+			//return 1;
 		}
 	}
 	return 0;
@@ -544,8 +638,8 @@ void trace(Ray *ray, Vec rgb)
             					vecCopy(hit.p, closehit.p);
             					vecCopy(o->color, closehit.color);
            	 				h=i;
-          }
-        }
+          			}
+       					}
 				break;
 			case TYPE_SPHERE:
 				break;
