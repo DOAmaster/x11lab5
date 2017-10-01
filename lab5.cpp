@@ -762,15 +762,39 @@ void trace(Ray *ray, Vec rgb)
 						vecCopy(hit.p, closehit.p);
 						vecCopy(o->color, closehit.color);
 						//checks if checkers is on
-						if ( g.checker) {
-							if(hit.t < g.checkx){
-								vecCopy(hit.p, closehit.p);
-								vecCopy(o->color, closehit.color);
+					
+					if (g.mode == 4) { 
+					//first disk to apply checker
+						if (h == 0) {
+							int dx = closehit.p[0] / (g.checkx);
+							if ( dx % 2 == 0) {
+								int dy = closehit.p[0] / (g.checky);
+								if ( dy % 2 == 0) {
 
-							}		
+								Vec temp;
+								vecCopy(o->color, temp);
+								temp[0] =+ .50;
+								temp[1] =+ .50;
+								temp[2] =+ .50;
+								vecCopy(temp, closehit.color);
+								}
+				
+							
+
+					
+					} else {
+						Vec temp;
+						vecCopy(o->color, temp);
+						temp[0] =+ .5;
+						temp[1] =+ .5;
+						temp[2] =+ .5;
+					//	vecCopy(hit.p
+					}	
 
 						}
 						h=i;
+					
+				}
 					}
 				}
 				break;
@@ -790,26 +814,18 @@ void trace(Ray *ray, Vec rgb)
 				break;
 		}
 	}
-	if (h < 0) {
+
+
+
 		//ray did not hit an object.
 		//draw checkered board
-//		int dx = hit.p[0] / (g.checkx);
-//		if ( dx % 2 == 0) {
-//			int dy = hit.p[1] / (g.checky);
-//			if( dy % 2 == 0) {
-//				x11.setColor3i(0,0,0);
-//				vecCopy(o->color, closehit.color);
-//			}
-//		} else {
-//			x11.setColor3i(255,255,255);
-//		}
-		return;
-	}
-	//The ray hit an object.
+	//Theray hit an object.
 	//Set the color of the pixel to the color of the object.
 	rgb[0] = closehit.color[0];
 	rgb[1] = closehit.color[1];
 	rgb[2] = closehit.color[2];
+
+
 	return;
 }
 
